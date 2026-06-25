@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MissionChief Dispatch Center</title>
+<style>
+:root{--bg:#050816;--panel:#0f172a;--panel2:#111c31;--text:#eef2ff;--muted:#93a4bc;--blue:#38bdf8;--blue2:#2563eb;--green:#34d399;--red:#fb7185;--yellow:#facc15;--cyan:#22d3ee;--purple:#c084fc;--orange:#fb923c;--shadow:0 24px 70px rgba(0,0,0,.42)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 15% 10%,rgba(56,189,248,.18),transparent 28%),radial-gradient(circle at 85% 15%,rgba(192,132,252,.14),transparent 30%),linear-gradient(135deg,#050816,#0b1226 45%,#111827)}
+.app{display:grid;grid-template-columns:360px 1fr;gap:22px;padding:22px}.left,.main{background:rgba(15,23,42,.82);border:1px solid rgba(148,163,184,.18);box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+.left{border-radius:28px;padding:20px;height:calc(100vh - 44px);position:sticky;top:22px;overflow:hidden;display:flex;flex-direction:column}.main{border-radius:28px;padding:20px;min-height:calc(100vh - 44px)}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:18px}.mark{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-weight:900;color:#02111f;background:linear-gradient(135deg,var(--blue),var(--green));box-shadow:0 0 28px rgba(56,189,248,.35)}h1{margin:0;font-size:22px}.brand p,.muted{color:var(--muted);margin:4px 0 0;font-size:13px}
+label{display:block;color:#cbd5e1;font-size:12px;text-transform:uppercase;letter-spacing:.12em;margin:12px 0 8px}input,select,textarea{width:100%;border:1px solid rgba(148,163,184,.22);border-radius:16px;background:rgba(2,6,23,.55);color:var(--text);outline:none;padding:13px 14px}textarea{min-height:260px;font-family:Consolas,monospace;resize:vertical}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.stat{padding:13px;border:1px solid rgba(148,163,184,.16);border-radius:18px;background:rgba(17,28,49,.75)}.stat strong{display:block;font-size:22px;color:var(--blue)}.stat span{color:var(--muted);font-size:12px}
+.list{overflow:auto}.list button{width:100%;text-align:left;border:1px solid rgba(148,163,184,.16);border-radius:18px;padding:13px 14px;margin:8px 0;color:var(--text);background:rgba(17,28,49,.72);cursor:pointer}.list button:hover,.list button.active{border-color:rgba(56,189,248,.65);background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(34,211,238,.12))}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.tab,button{border:0;border-radius:16px;color:var(--text);background:rgba(2,6,23,.5);border:1px solid rgba(148,163,184,.18);padding:11px 15px;cursor:pointer;font-weight:650}.tab.active,.primary{background:linear-gradient(135deg,var(--blue2),#0891b2);border-color:rgba(56,189,248,.5);box-shadow:0 12px 30px rgba(37,99,235,.25)}.ghost{background:rgba(15,23,42,.75)}
+.screen{display:none}.screen.active{display:block}.hero{display:flex;justify-content:space-between;gap:18px;padding:24px;border-radius:26px;background:linear-gradient(135deg,rgba(37,99,235,.18),rgba(34,211,238,.07)),rgba(17,28,49,.78);border:1px solid rgba(148,163,184,.18);margin-bottom:16px}.eyebrow{color:var(--blue);font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}.hero h2{margin:0;font-size:34px;letter-spacing:-.03em}.badges span{display:inline-block;margin:12px 8px 0 0;padding:7px 10px;border-radius:999px;background:rgba(2,6,23,.55);border:1px solid rgba(148,163,184,.2);color:#dbeafe;font-size:13px}.credits{text-align:right;min-width:150px}.credits span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em}.credits strong{display:block;color:#fde68a;font-size:34px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 22px}.title{display:flex;justify-content:space-between;align-items:flex-end;margin:24px 0 12px}.title h3{margin:0}.title span{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}.card{border-radius:22px;background:rgba(17,28,49,.76);border:1px solid rgba(148,163,184,.16);overflow:hidden}.card h3{margin:0;padding:14px 16px;border-bottom:1px solid rgba(148,163,184,.14);font-size:16px}.fire h3{border-left:7px solid var(--red)}.police h3{border-left:7px solid var(--blue)}.special h3{border-left:7px solid var(--yellow)}.water h3{border-left:7px solid var(--cyan)}.airport h3{border-left:7px solid var(--purple)}.wild h3{border-left:7px solid var(--green)}.command h3{border-left:7px solid var(--orange)}
+.row{display:grid;grid-template-columns:1fr auto;gap:14px;padding:12px 16px;border-top:1px solid rgba(148,163,184,.08)}.qty{font-size:19px;font-weight:900;color:#e0f2fe}.note{color:#fde68a;margin-left:6px;font-size:12px}.text,.log{padding:16px;min-height:140px;border-radius:22px;background:rgba(2,6,23,.62);border:1px solid rgba(148,163,184,.16);color:#dbeafe;white-space:pre-wrap;font-family:Consolas,monospace}.adminbar{display:grid;grid-template-columns:1fr auto;gap:10px}.pending{display:grid;gap:12px;margin-top:18px}.pending-card{border:1px solid rgba(148,163,184,.18);border-radius:22px;background:rgba(17,28,49,.76);padding:16px}.pending-card .mini{color:var(--muted);font-size:13px;margin:6px 0}.pending-card .items{color:#dbeafe;font-size:13px;margin-top:8px}table{width:100%;border-collapse:collapse;background:rgba(2,6,23,.35)}th,td{padding:13px 14px;border-bottom:1px solid rgba(148,163,184,.12);text-align:left}th{color:#cbd5e1;font-size:12px;text-transform:uppercase;letter-spacing:.12em}.setup{position:fixed;inset:0;z-index:1000;display:none;place-items:center;padding:20px;background:rgba(2,6,23,.82);backdrop-filter:blur(18px)}.setup.show{display:grid}.setup-card{width:min(680px,100%);padding:24px;border-radius:28px;background:rgba(15,23,42,.96);border:1px solid rgba(148,163,184,.2);box-shadow:var(--shadow)}.toast{position:fixed;right:22px;bottom:22px;padding:14px 16px;border-radius:16px;background:rgba(15,23,42,.92);border:1px solid rgba(56,189,248,.45);color:#e0f2fe;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.18s}.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:950px){.app{grid-template-columns:1fr;padding:12px}.left{position:relative;top:0;height:auto;max-height:580px}.hero{flex-direction:column}.credits{text-align:left}.adminbar{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="setup" class="setup show"><div class="setup-card">
+<div class="brand"><div class="mark">MC</div><div><h1>Setup Dispatch Center</h1><p>No file editing needed</p></div></div>
+<p class="muted">Paste your Supabase values below. These save in this browser.</p>
+<label>Supabase Project URL</label><input id="setupUrl" placeholder="https://your-project.supabase.co">
+<label>Supabase Anon / Publishable Key</label><textarea id="setupKey" placeholder="Paste sb_publishable... key here"></textarea>
+<label>Admin Code</label><input id="setupAdmin" type="password" placeholder="Choose admin passcode">
+<div class="actions"><button id="saveSetup" class="primary">Save & Launch</button><button id="demo" class="ghost">Use Demo Mode</button></div>
+</div></div>
+<div class="app">
+<aside class="left"><div class="brand"><div class="mark">MC</div><div><h1>Dispatch Center</h1><p>MissionChief Companion</p></div></div>
+<label>Search missions</label><input id="search" placeholder="Hotel, fire, SWAT..."><label>Category</label><select id="filter"><option value="">All categories</option><option>Fire</option><option>Police</option><option>Federal</option><option>Water</option><option>Airport</option><option>Wildfire</option><option>Traffic</option><option>Ambulance</option></select>
+<div class="stats"><div class="stat"><strong id="count">0</strong><span>Missions</span></div><div class="stat"><strong id="db">—</strong><span>Database</span></div></div><div class="list" id="missionList"></div></aside>
+<main class="main"><nav class="tabs"><button class="tab active" data-tab="dispatch">🚨 Dispatch</button><button class="tab" data-tab="submit">➕ Submit</button><button class="tab" data-tab="admin">🛡️ Admin</button><button class="tab" data-tab="browser">📚 Browser</button></nav>
+<section id="dispatch" class="screen active"><div class="hero"><div><div class="eyebrow">Selected Mission</div><h2 id="missionName">Loading...</h2><div id="badges" class="badges"></div></div><div class="credits"><span>Credits</span><strong id="credits">—</strong></div></div><div class="actions"><button id="copy" class="primary">Copy Dispatch</button><button onclick="window.print()" class="ghost">Print Card</button></div><div class="title"><h3>Dispatch Card</h3><span>Only vehicles, personnel, and resources to send</span></div><div id="cards" class="grid"></div><div class="title"><h3>Plain Text Dispatch</h3><span>For copy/paste</span></div><div id="dispatchText" class="text">Pick a mission.</div></section>
+<section id="submit" class="screen"><div class="hero"><div><div class="eyebrow">Community Submission</div><h2>Submit a Mission</h2><p class="muted">Paste one MissionChief mission or many mission blocks at once. They go into pending review.</p></div></div><textarea id="submitText" placeholder="Paste one mission or many MissionChief mission blocks here..."></textarea><div class="actions"><button id="submitBtn" class="primary">Bulk Submit Mission(s)</button><button id="clearBtn" class="ghost">Clear</button></div><div id="submitLog" class="log">No submission yet.</div></section>
+<section id="admin" class="screen"><div class="hero"><div><div class="eyebrow">Review Queue</div><h2>Admin Review</h2><p class="muted">Approve submissions so everyone can see them.</p></div></div><div class="adminbar"><input id="adminCode" type="password" placeholder="Admin passcode"><button id="pendingBtn" class="primary">Load Pending</button><button id="approveAllBtn" class="ghost">Approve All</button></div><div id="pendingList" class="pending"></div>
+<div class="pending-card" style="margin-top:18px;">
+  <h3>Admin Settings</h3>
+  <p class="muted">These are hidden from normal users. Enter the admin code above, then use these if the Supabase connection ever needs to be updated.</p>
+  <div id="adminSettings" style="display:none;">
+    <label>Supabase Project URL</label>
+    <input id="settingsUrl" placeholder="https://your-project.supabase.co">
+    <label>Supabase Key</label>
+    <textarea id="settingsKey" placeholder="Supabase publishable key"></textarea>
+    <label>Admin Code</label>
+    <input id="settingsAdmin" type="password" placeholder="Admin code">
+    <div class="actions">
+      <button id="saveSettings" class="primary">Save Settings</button>
+      <button id="resetSettings" class="ghost">Reset Local Settings</button>
+    </div>
+  </div>
+</div>
+</section>
+<section id="browser" class="screen"><div class="hero"><div><div class="eyebrow">Database</div><h2>Mission Browser</h2><p class="muted">Approved missions in the shared database.</p></div></div><table><thead><tr><th>Mission</th><th>Credits</th><th>Type</th><th>POI</th><th>Items</th></tr></thead><tbody id="browserBody"></tbody></table></section>
+
+</main></div><div id="toast" class="toast"></div>
+
+<script>
+localStorage.setItem("mc_settings", "{\"url\": \"https://htakgpigwvfmrgtyigmm.supabase.co\", \"key\": \"sb_publishable_nYin9jeTyBOxcnZvsD0exw_40JQ5lH-\", \"admin\": \"admin\"}");
+</script>
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+let supabase=null, settings=null, missions=[], selected=null, demoMode=false;
+const seed=[{name:"Hotel Fire Large",credits:9000,type:"Fire Fighting Missions / Urban Fire Missions",poi:"Hotel",dispatch:[["Fire","Firetrucks",8,""],["Fire","Battalion Chief Vehicles",2,""],["Fire","Platform Trucks",1,""],["Fire","Heavy Rescue Vehicles",1,""],["Fire","Water Tankers",1,"10% chance"],["Fire","Mobile Air Vehicles",1,"30% chance"],["Police/Federal","Police Cars",3,""],["Fire","Fire Investigation Units",2,""]],other:[["Patients","Max Patients",20],["Patients","Transport Chance","40%"],["Patients","Specialization","General Internal"]]},{name:"Active Shooter",credits:3100,type:"Police Missions",poi:"",dispatch:[["Police/Federal","Police Cars",4,""],["Police/Federal","SWAT Personnel (In SWAT Vehicles)",24,""],["Police/Federal","Police Helicopters",1,""]],other:[["Personnel","Sharpshooters",6]]}];
+const meta={"Fire":["🚒 Fire","fire"],"Police/Federal":["🚓 Police / Federal","police"],"Special":["☣️ Special / HazMat","special"],"Water Rescue":["🚤 Water Rescue","water"],"Airport":["✈️ Airport","airport"],"Wildland":["🌲 Wildland","wild"],"Command":["📟 Command","command"],"Personnel":["👥 Personnel","special"],"Resource":["📦 Resources","special"],"Patients":["🚑 Patients","special"],"Prisoners":["🚔 Prisoners","police"],"Info":["ℹ️ Other Info","special"]};
+function toast(x){const t=document.getElementById("toast");t.textContent=x;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+function fmt(n){return typeof n==="number"?n.toLocaleString():n}
+function getS(){try{return JSON.parse(localStorage.getItem("mc_settings")||"null")}catch{return null}}
+function saveS(url,key,admin){const s={url:url.trim(),key:key.trim(),admin:admin.trim()};localStorage.setItem("mc_settings",JSON.stringify(s));return s}
+function init(){settings=getS();if(!settings||!settings.url||!settings.key){document.getElementById("setup").classList.add("show");loadDemo();return}document.getElementById("setup").classList.remove("show");supabase=createClient(settings.url,settings.key);demoMode=false;document.getElementById("db").textContent="Live";fillSettings();loadMissions()}
+function fillSettings(){const s=getS();if(!s)return;settingsUrl.value=s.url||"";settingsKey.value=s.key||"";settingsAdmin.value=s.admin||""}
+function loadDemo(){demoMode=true;missions=seed;selected=missions[0];document.getElementById("db").textContent="Demo";renderAll()}
+function cat(unit){let u=unit.toLowerCase();if(/police|fbi|dea|atf|swat|k-9|sheriff/.test(u))return"Police/Federal";if(/boat|patrol/.test(u))return"Water Rescue";if(/arff/.test(u))return"Airport";if(/wildland|forestry/.test(u))return"Wildland";if(/command/.test(u))return"Command";if(/hazmat|foam|tower|generator|crane|flood|pump capacity|water required|foam required/.test(u))return"Special";return"Fire"}
+function splitBlocks(text){let lines=text.split(/\r?\n/),starts=[];for(let i=0;i<lines.length;i++){let cur=lines[i].trim(),next=(lines[i+1]||"").trim(),next2=(lines[i+2]||"").trim();if(cur&&!/^(Reward and Precondition|Vehicle and Personnel Requirements|Other information|Mission Type|Generated by|Back|Value)$/i.test(cur)&&(next==="Reward and Precondition"||next2==="Reward and Precondition"))starts.push(i)}if(!starts.length)return[text];let blocks=[];for(let s=0;s<starts.length;s++)blocks.push(lines.slice(starts[s],s+1<starts.length?starts[s+1]:lines.length).join("\n"));return blocks}
+function parseBlock(txt){const lines=txt.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);let name=lines[0]||"Unnamed Mission",credits=0,type="",poi="";let ac=txt.match(/Average credits\s+(\d+)/i);if(ac)credits=parseInt(ac[1]);let pm=txt.match(/POI\s+([\s\S]*?)(?:Required|Mission Type)/i);if(pm)poi=pm[1].trim().split(/\n/).map(x=>x.trim()).filter(Boolean)[0]||"";let mt=txt.match(/Mission Type\s+([\s\S]*?)Generated by/i);if(mt)type=mt[1].replace(/\n+/g," / ").trim();let sec=(txt.split(/Vehicle and Personnel Requirements\s+Value/i)[1]||"");sec=(sec.split(/Other information\s+Value/i)[0]||sec).split(/\nBack/i)[0];let probs={};sec.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{let p=line.match(/^Probability of (.+?) being required\s+(\d+)/i);if(p)probs[p[1].trim().toLowerCase()]=p[2]+"% chance"});let dispatch=[];sec.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{if(/^Probability of/i.test(line))return;let m=line.match(/^(Required .+?|Foam required|Water required|Min\. Pump Capacity|Required Personnel)\s+(.+)$/i);if(!m)return;let raw=m[1].replace(/^Required\s+/i,"").trim(),val=m[2].trim(),q=val.match(/(\d+)/);if(!q)return;let note="";Object.keys(probs).forEach(k=>{let simple=k.replace(/^required\s+/,"");if(raw.toLowerCase().includes(simple)||simple.includes(raw.toLowerCase()))note=probs[k]});let c=cat(raw);if(/Required Personnel/i.test(m[1]))c="Personnel";dispatch.push([c,raw,parseInt(q[1]),note])});let other=[],oth=txt.split(/Other information\s+Value/i)[1]||"";oth=(oth.split(/\nBack/i)[0]||oth);oth.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{if(/^Back$/i.test(line))return;let m=line.match(/^(.+?)\s+(.+)$/);if(m){let label=m[1].trim(),val=m[2].trim(),c=/patient|transport|helicopter|specialization/i.test(label)?"Patients":/prisoner/i.test(label)?"Prisoners":/personnel|sharpshooter|hazmat/i.test(label)?"Personnel":"Info";other.push([c,label,val,""])}});return{name,credits,type,poi,dispatch,other}}
+async function loadMissions(){if(demoMode||!supabase)return loadDemo();const {data,error}=await supabase.from("missions").select("*").eq("status","approved").order("name");if(error){console.error(error);toast("Could not load missions");loadDemo();return}missions=data.map(r=>({id:r.id,name:r.name,credits:r.credits||0,type:r.mission_type||"",poi:r.poi||"",dispatch:r.dispatch||[],other:r.other_info||[]}));selected=missions[0]||null;renderAll()}
+function renderList(){const q=search.value.toLowerCase(),f=filter.value.toLowerCase();missionList.innerHTML="";let filtered=missions.filter(m=>(!q||m.name.toLowerCase().includes(q))&&(!f||(m.type||"").toLowerCase().includes(f)||m.name.toLowerCase().includes(f)));count.textContent=missions.length;filtered.forEach(m=>{let b=document.createElement("button");b.textContent=m.name;if(selected&&selected.name===m.name)b.classList.add("active");b.onclick=()=>{selected=m;renderMission();renderList()};missionList.appendChild(b)})}
+function groups(m){let g={};[...(m.dispatch||[]),...(m.other||[])].forEach(([c,u,q,n])=>{if(!g[c])g[c]=[];g[c].push({unit:u,qty:q,note:n})});return g}
+function renderMission(){if(!selected){missionName.textContent="No missions loaded";dispatchText.textContent="Run setup and seed missions first.";cards.innerHTML="";return}missionName.textContent=selected.name;credits.textContent=fmt(selected.credits||0);badges.innerHTML="";[selected.type,selected.poi?"POI: "+selected.poi:null,demoMode?"Demo Mode":"Live Database"].filter(Boolean).forEach(x=>{let s=document.createElement("span");s.textContent=x;badges.appendChild(s)});let g=groups(selected);cards.innerHTML="";Object.keys(g).forEach(c=>{let m=meta[c]||[c,"special"],card=document.createElement("div");card.className="card "+m[1];card.innerHTML="<h3>"+m[0]+"</h3>";g[c].forEach(r=>{let row=document.createElement("div");row.className="row";row.innerHTML=`<div>${r.unit}${r.note?`<span class="note">(${r.note})</span>`:""}</div><div class="qty">x${fmt(r.qty)}</div>`;card.appendChild(row)});cards.appendChild(card)});let lines=[selected.name.toUpperCase(),"Credits: "+fmt(selected.credits||0)];if(selected.poi)lines.push("POI: "+selected.poi);lines.push("");Object.keys(g).forEach(c=>{let m=meta[c]||[c,"special"];lines.push(m[0].replace(/[🚒🚓☣️🚤✈️🌲📟👥📦🚑🚔ℹ️]/g,"").trim().toUpperCase());g[c].forEach(r=>lines.push(`- ${r.qty}x ${r.unit}${r.note?" ("+r.note+")":""}`));lines.push("")});dispatchText.textContent=lines.join("\n")}
+function renderBrowser(){browserBody.innerHTML="";missions.forEach(m=>{let tr=document.createElement("tr");tr.innerHTML=`<td>${m.name}</td><td>${fmt(m.credits||0)}</td><td>${m.type||""}</td><td>${m.poi||""}</td><td>${(m.dispatch||[]).length+(m.other||[]).length}</td>`;browserBody.appendChild(tr)})}
+function renderAll(){renderList();renderMission();renderBrowser()}
+async function submitMission(){let text=submitText.value.trim();if(!text){toast("Paste mission text first");return}let blocks=splitBlocks(text),imp=0,fail=0,logs=[];for(const b of blocks){try{let m=parseBlock(b);if(!m.name||!m.dispatch.length){fail++;logs.push("Skipped: no dispatch requirements found");continue}if(demoMode||!supabase){missions.push(m);imp++;logs.push("Added locally: "+m.name);continue}let {error}=await supabase.from("mission_submissions").insert({name:m.name,credits:m.credits,mission_type:m.type,poi:m.poi,dispatch:m.dispatch,other_info:m.other,raw_text:b,status:"pending"});if(error)throw error;imp++;logs.push("Submitted: "+m.name)}catch(e){fail++;logs.push("Failed: "+e.message)}}if(demoMode){selected=missions[missions.length-1];renderAll()}submitLog.textContent=`Submitted/Added: ${imp}\nSkipped/Failed: ${fail}\n\n`+logs.join("\n");toast(`Processed ${imp} mission(s)`)}
+async function loadPending(){let s=getS(),expected=s?.admin||"";if(adminCode.value!==expected){toast("Wrong admin passcode");return}if(demoMode||!supabase){pendingList.innerHTML="<div class='pending-card'>Admin review requires live Supabase setup.</div>";return}if(document.getElementById("adminSettings")) document.getElementById("adminSettings").style.display="block"; let {data,error}=await supabase.from("mission_submissions").select("*").eq("status","pending").order("created_at");if(error){toast(error.message);return}pendingList.innerHTML="";if(!data.length){pendingList.innerHTML="<div class='pending-card'>No pending submissions.</div>";return}data.forEach(item=>{let div=document.createElement("div");div.className="pending-card";let preview=(item.dispatch||[]).slice(0,5).map(x=>`${x[2]}x ${x[1]}`).join(" · "); if((item.dispatch||[]).length>5) preview+=" · ..."; div.innerHTML=`<h3>${item.name}</h3><p class="mini">${item.credits||0} credits · ${item.mission_type||""}</p><p class="mini">${(item.dispatch||[]).length} dispatch items</p><div class="items">${preview}</div><br><button data-id="${item.id}" class="approve primary">Approve</button> <button data-id="${item.id}" class="reject">Reject</button>`;pendingList.appendChild(div)});document.querySelectorAll(".approve").forEach(btn=>btn.onclick=()=>approve(btn.dataset.id));document.querySelectorAll(".reject").forEach(btn=>btn.onclick=()=>reject(btn.dataset.id))}
+async function approve(id){let {data:sub,error:e1}=await supabase.from("mission_submissions").select("*").eq("id",id).single();if(e1){toast(e1.message);return}let {error:e2}=await supabase.from("missions").upsert({name:sub.name,credits:sub.credits,mission_type:sub.mission_type,poi:sub.poi,dispatch:sub.dispatch,other_info:sub.other_info,status:"approved"},{onConflict:"name"});if(e2){toast(e2.message);return}await supabase.from("mission_submissions").update({status:"approved"}).eq("id",id);toast("Mission approved");await 
+function prefillAdminSettings(){
+  try{
+    const s=JSON.parse(localStorage.getItem("mc_settings")||"{}");
+    if(document.getElementById("settingsUrl")) settingsUrl.value=s.url||"https://htakgpigwvfmrgtyigmm.supabase.co";
+    if(document.getElementById("settingsKey")) settingsKey.value=s.key||"sb_publishable_nYin9jeTyBOxcnZvsD0exw_40JQ5lH-";
+    if(document.getElementById("settingsAdmin")) settingsAdmin.value=s.admin||"admin";
+  }catch(e){}
+}
+prefillAdminSettings();
+
+loadMissions();await loadPending()}
+
+async function approveAll(){
+  if(!adminCode.value){toast("Enter admin code");return}
+  let {data,error}=await supabase.from("mission_submissions").select("*").eq("status","pending").order("created_at");
+  if(error){toast(error.message);return}
+  if(!data.length){toast("No pending missions");return}
+  let ok=0,fail=0;
+  for(const sub of data){
+    try{
+      let {error:e2}=await supabase.from("missions").upsert({
+        name:sub.name,
+        credits:sub.credits,
+        mission_type:sub.mission_type,
+        poi:sub.poi,
+        dispatch:sub.dispatch,
+        other_info:sub.other_info,
+        status:"approved"
+      },{onConflict:"name"});
+      if(e2) throw e2;
+      await supabase.from("mission_submissions").update({status:"approved"}).eq("id",sub.id);
+      ok++;
+    }catch(e){fail++; console.error(e)}
+  }
+  toast(`Approved ${ok} mission(s)${fail?`, ${fail} failed`:""}`);
+  await loadMissions();
+  await loadPending();
+}
+
+async function reject(id){await supabase.from("mission_submissions").update({status:"rejected"}).eq("id",id);toast("Mission rejected");await loadPending()}
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{document.querySelectorAll(".screen").forEach(p=>p.classList.remove("active"));document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.getElementById(btn.dataset.tab).classList.add("active");btn.classList.add("active")});
+search.addEventListener("input",renderList);filter.addEventListener("change",renderList);copy.onclick=()=>{navigator.clipboard.writeText(dispatchText.textContent);toast("Dispatch copied")};submitBtn.onclick=submitMission;clearBtn.onclick=()=>submitText.value="";pendingBtn.onclick=loadPending;if(document.getElementById('approveAllBtn'))approveAllBtn.onclick=approveAll;saveSetup.onclick=()=>{if(!setupUrl.value||!setupKey.value||!setupAdmin.value){toast("Fill in all setup fields");return}saveS(setupUrl.value,setupKey.value,setupAdmin.value);toast("Setup saved");init()};demo.onclick=()=>{setup.classList.remove("show");loadDemo();toast("Demo mode enabled")};saveSettings.onclick=()=>{saveS(settingsUrl.value,settingsKey.value,settingsAdmin.value);toast("Settings saved");init()};resetSettings.onclick=()=>{if(confirm("Reset setup?")){localStorage.removeItem("mc_settings");setup.classList.add("show");toast("Setup reset")}};init();
+</script>
+</body>
+</html>
