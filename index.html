@@ -35,6 +35,15 @@ label{display:block;color:#cbd5e1;font-size:12px;text-transform:uppercase;letter
 .vehicle-preview{margin-top:12px;padding:14px;border-radius:18px;background:rgba(2,6,23,.45);border:1px solid rgba(148,163,184,.16);white-space:pre-wrap;color:#dbeafe;font-family:Consolas,monospace}
 .file-input{padding:12px;border:1px dashed rgba(56,189,248,.45);background:rgba(2,6,23,.35)}
 
+
+.admin-tools{margin-top:18px}
+.admin-tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:12px}
+.admin-tool-card{border:1px solid rgba(148,163,184,.18);border-radius:22px;background:rgba(17,28,49,.76);padding:16px}
+.admin-tool-card h3{margin:0 0 8px}
+.danger{background:rgba(185,28,28,.75)!important;border-color:rgba(251,113,133,.45)!important}
+.mission-remove-list{display:grid;gap:8px;margin-top:12px;max-height:320px;overflow:auto}
+.remove-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px;border-radius:14px;border:1px solid rgba(148,163,184,.12);background:rgba(2,6,23,.35)}
+
 </style>
 </head>
 <body>
@@ -70,6 +79,26 @@ label{display:block;color:#cbd5e1;font-size:12px;text-transform:uppercase;letter
 
 <section id="submit" class="screen"><div class="hero"><div><div class="eyebrow">Community Submission</div><h2>Submit a Mission</h2><p class="muted">Paste a MissionChief mission block. It goes into pending review.</p></div></div><textarea id="submitText" placeholder="Paste MissionChief mission text here..."></textarea><div class="actions"><button id="submitBtn" class="primary">Submit Mission</button><button id="clearBtn" class="ghost">Clear</button></div><div id="submitLog" class="log">No submission yet.</div></section>
 <section id="admin" class="screen"><div class="hero"><div><div class="eyebrow">Review Queue</div><h2>Admin Review</h2><p class="muted">Approve submissions so everyone can see them.</p></div></div><div class="adminbar"><input id="adminCode" type="password" placeholder="Admin passcode"><button id="pendingBtn" class="primary">Load Pending</button></div><div id="pendingList" class="pending"></div>
+<div class="pending-card admin-tools">
+  <h3>Database Tools</h3>
+  <p class="muted">Admin-only tools for maintaining the mission database.</p>
+  <div class="admin-tool-grid">
+    <div class="admin-tool-card">
+      <h3>Rebuild All Missions</h3>
+      <p class="muted">Re-runs the latest parser on approved missions that have saved raw mission text.</p>
+      <button id="rebuildMissionsBtn" class="primary">Rebuild All Missions</button>
+      <div id="rebuildLog" class="log" style="margin-top:12px;min-height:90px;">No rebuild run yet.</div>
+    </div>
+    <div class="admin-tool-card">
+      <h3>Remove Mission</h3>
+      <p class="muted">Search approved missions and remove bad/duplicate entries.</p>
+      <input id="removeMissionSearch" placeholder="Search mission to remove...">
+      <button id="loadRemoveMissionsBtn" class="ghost">Load Missions</button>
+      <div id="removeMissionList" class="mission-remove-list"></div>
+    </div>
+  </div>
+</div>
+
 <div class="pending-card" style="margin-top:18px;">
   <h3>Admin Settings</h3>
   <p class="muted">These are hidden from normal users. Enter the admin code above, then use these if the Supabase connection ever needs to be updated.</p>
@@ -164,6 +193,7 @@ function renderFleetStatus(){
 
 function toast(x){const t=document.getElementById("toast");t.textContent=x;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
 function fmt(n){return typeof n==="number"?n.toLocaleString():n}
+function normalizeMissionName(name){return String(name||"").toLowerCase().replace(/\([^)]*\)/g," ").replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()}
 function getS(){try{return JSON.parse(localStorage.getItem("mc_settings")||"null")}catch{return null}}
 function saveS(url,key,admin){const s={url:url.trim(),key:key.trim(),admin:admin.trim()};localStorage.setItem("mc_settings",JSON.stringify(s));return s}
 function init(){settings=getS();if(!settings||!settings.url||!settings.key){document.getElementById("setup").classList.add("show");loadDemo();return}document.getElementById("setup").classList.remove("show");supabase=createClient(settings.url,settings.key);demoMode=false;document.getElementById("db").textContent="Live";fillSettings();loadMissions()}
@@ -182,9 +212,83 @@ function groups(m){let g={};[...(m.dispatch||[]),...(m.other||[])].forEach(([c,u
 function renderMission(){if(!selected){missionName.textContent="No missions loaded";dispatchText.textContent="Run setup and seed missions first.";cards.innerHTML="";return}missionName.textContent=selected.name;credits.textContent=fmt(selected.credits||0);badges.innerHTML="";[selected.type,selected.poi?"POI: "+selected.poi:null,demoMode?"Demo Mode":"Live Database"].filter(Boolean).forEach(x=>{let s=document.createElement("span");s.textContent=x;badges.appendChild(s)});renderFleetStatus();let g=groups(selected);cards.innerHTML="";Object.keys(g).forEach(c=>{let m=meta[c]||[c,"special"],card=document.createElement("div");card.className="card "+m[1];card.innerHTML="<h3>"+m[0]+"</h3>";g[c].forEach(r=>{let row=document.createElement("div");row.className="row";row.innerHTML=`<div>${r.unit}${r.note?`<span class="note">(${r.note})</span>`:""}</div><div class="qty">x${fmt(r.qty)}</div>`;card.appendChild(row)});cards.appendChild(card)});let lines=[selected.name.toUpperCase(),"Credits: "+fmt(selected.credits||0)];if(selected.poi)lines.push("POI: "+selected.poi);lines.push("");Object.keys(g).forEach(c=>{let m=meta[c]||[c,"special"];lines.push(m[0].replace(/[🚒🚓☣️🚤✈️🌲📟👥📦🚑🚔ℹ️]/g,"").trim().toUpperCase());g[c].forEach(r=>lines.push(`- ${r.qty}x ${r.unit}${r.note?" ("+r.note+")":""}`));lines.push("")});dispatchText.textContent=lines.join("\n")}
 function renderBrowser(){browserBody.innerHTML="";missions.forEach(m=>{let tr=document.createElement("tr");tr.innerHTML=`<td>${m.name}</td><td>${fmt(m.credits||0)}</td><td>${m.type||""}</td><td>${m.poi||""}</td><td>${(m.dispatch||[]).length+(m.other||[]).length}</td>`;browserBody.appendChild(tr)})}
 function renderAll(){renderList();renderMission();renderBrowser()}
-async function submitMission(){let text=submitText.value.trim();if(!text){toast("Paste mission text first");return}let blocks=splitBlocks(text),imp=0,fail=0,logs=[];for(const b of blocks){try{let m=parseBlock(b);if(!m.name||!m.dispatch.length){fail++;logs.push("Skipped: no dispatch requirements found");continue}if(demoMode||!supabase){missions.push(m);imp++;logs.push("Added locally: "+m.name);continue}let {error}=await supabase.from("mission_submissions").insert({name:m.name,credits:m.credits,mission_type:m.type,poi:m.poi,dispatch:m.dispatch,other_info:m.other,raw_text:b,status:"pending"});if(error)throw error;imp++;logs.push("Submitted: "+m.name)}catch(e){fail++;logs.push("Failed: "+e.message)}}if(demoMode){selected=missions[missions.length-1];renderAll()}submitLog.textContent=`Submitted/Added: ${imp}\nSkipped/Failed: ${fail}\n\n`+logs.join("\n");toast(`Processed ${imp} mission(s)`)}
+async function submitMission(){let text=submitText.value.trim();if(!text){toast("Paste mission text first");return}let blocks=splitBlocks(text),imp=0,fail=0,logs=[];for(const b of blocks){try{let m=parseBlock(b);if(!m.name||!m.dispatch.length){fail++;logs.push("Skipped: no dispatch requirements found");continue}let dup=await isDuplicateMission(m.name);if(dup){fail++;logs.push("Skipped duplicate: "+m.name+" already exists as "+dup);continue}if(demoMode||!supabase){missions.push(m);imp++;logs.push("Added locally: "+m.name);continue}let {error}=await supabase.from("mission_submissions").insert({name:m.name,credits:m.credits,mission_type:m.type,poi:m.poi,dispatch:m.dispatch,other_info:m.other,raw_text:b,status:"pending",normalized_name:normalizeMissionName(m.name)});if(error)throw error;imp++;logs.push("Submitted: "+m.name)}catch(e){fail++;logs.push("Failed: "+e.message)}}if(demoMode){selected=missions[missions.length-1];renderAll()}submitLog.textContent=`Submitted/Added: ${imp}\nSkipped/Failed: ${fail}\n\n`+logs.join("\n");toast(`Processed ${imp} mission(s)`)}
 async function loadPending(){let s=getS(),expected=s?.admin||"";if(adminCode.value!==expected){toast("Wrong admin passcode");return}if(demoMode||!supabase){pendingList.innerHTML="<div class='pending-card'>Admin review requires live Supabase setup.</div>";return}if(document.getElementById("adminSettings")) document.getElementById("adminSettings").style.display="block"; let {data,error}=await supabase.from("mission_submissions").select("*").eq("status","pending").order("created_at");if(error){toast(error.message);return}pendingList.innerHTML="";if(!data.length){pendingList.innerHTML="<div class='pending-card'>No pending submissions.</div>";return}data.forEach(item=>{let div=document.createElement("div");div.className="pending-card";div.innerHTML=`<h3>${item.name}</h3><p>${item.credits||0} credits · ${item.mission_type||""}</p><p>${(item.dispatch||[]).length} dispatch items</p><button data-id="${item.id}" class="approve primary">Approve</button> <button data-id="${item.id}" class="reject">Reject</button>`;pendingList.appendChild(div)});document.querySelectorAll(".approve").forEach(btn=>btn.onclick=()=>approve(btn.dataset.id));document.querySelectorAll(".reject").forEach(btn=>btn.onclick=()=>reject(btn.dataset.id))}
-async function approve(id){let {data:sub,error:e1}=await supabase.from("mission_submissions").select("*").eq("id",id).single();if(e1){toast(e1.message);return}let {error:e2}=await supabase.from("missions").upsert({name:sub.name,credits:sub.credits,mission_type:sub.mission_type,poi:sub.poi,dispatch:sub.dispatch,other_info:sub.other_info,status:"approved"},{onConflict:"name"});if(e2){toast(e2.message);return}await supabase.from("mission_submissions").update({status:"approved"}).eq("id",id);toast("Mission approved");await 
+
+async function isDuplicateMission(name){
+  if(!supabase)return null;
+  const normalized=normalizeMissionName(name);
+  try{
+    const {data:approved}=await supabase.from("missions").select("name,normalized_name").eq("normalized_name",normalized).limit(1);
+    if(approved&&approved.length)return approved[0].name;
+    const {data:pending}=await supabase.from("mission_submissions").select("name,normalized_name").eq("status","pending").eq("normalized_name",normalized).limit(1);
+    if(pending&&pending.length)return pending[0].name+" (pending)";
+  }catch(e){console.warn("Duplicate check skipped",e)}
+  return null;
+}
+
+async function rebuildAllMissions(){
+  if(adminCode.value!=="admin"){toast("Wrong admin passcode");return}
+  rebuildLog.textContent="Loading approved missions...";
+  const {data,error}=await supabase.from("missions").select("*").order("name");
+  if(error){rebuildLog.textContent=error.message;return}
+  let updated=0,skipped=0,failed=0,lines=[];
+  for(const mission of data){
+    try{
+      if(!mission.raw_text){skipped++;lines.push("Skipped no raw text: "+mission.name);continue}
+      const parsed=parseBlock(mission.raw_text);
+      if(!parsed.name||!parsed.dispatch.length){skipped++;lines.push("Skipped could not parse: "+mission.name);continue}
+      const {error:updateError}=await supabase.from("missions").update({
+        name:parsed.name,
+        credits:parsed.credits,
+        mission_type:parsed.type,
+        poi:parsed.poi,
+        dispatch:parsed.dispatch,
+        other_info:parsed.other,
+        normalized_name:normalizeMissionName(parsed.name)
+      }).eq("id",mission.id);
+      if(updateError)throw updateError;
+      updated++;
+      lines.push("Updated: "+parsed.name);
+    }catch(e){
+      failed++;
+      lines.push("Failed: "+mission.name+" — "+e.message);
+    }
+  }
+  rebuildLog.textContent=`Rebuild complete\nUpdated: ${updated}\nSkipped: ${skipped}\nFailed: ${failed}\n\n`+lines.join("\n");
+  toast("Rebuild complete");
+  await if(document.getElementById('rebuildMissionsBtn'))rebuildMissionsBtn.onclick=rebuildAllMissions;if(document.getElementById('loadRemoveMissionsBtn'))loadRemoveMissionsBtn.onclick=loadRemoveMissions;if(document.getElementById('removeMissionSearch'))removeMissionSearch.addEventListener('input',()=>{clearTimeout(window.__removeSearchTimer);window.__removeSearchTimer=setTimeout(loadRemoveMissions,300)});loadMissions();
+}
+
+async function loadRemoveMissions(){
+  if(adminCode.value!=="admin"){toast("Wrong admin passcode");return}
+  const q=(removeMissionSearch.value||"").trim();
+  let query=supabase.from("missions").select("id,name,credits,mission_type").order("name").limit(100);
+  if(q)query=query.ilike("name",`%${q}%`);
+  const {data,error}=await query;
+  if(error){toast(error.message);return}
+  removeMissionList.innerHTML="";
+  if(!data.length){removeMissionList.innerHTML="<div class='muted'>No missions found.</div>";return}
+  data.forEach(m=>{
+    const row=document.createElement("div");
+    row.className="remove-row";
+    row.innerHTML=`<div><strong>${m.name}</strong><div class="muted">${m.credits||0} credits · ${m.mission_type||""}</div></div><button class="danger" data-id="${m.id}" data-name="${m.name.replace(/"/g,'&quot;')}">Remove</button>`;
+    removeMissionList.appendChild(row);
+  });
+  document.querySelectorAll("#removeMissionList .danger").forEach(btn=>{
+    btn.onclick=async()=>{
+      const name=btn.dataset.name;
+      if(!confirm("Remove mission: "+name+"?"))return;
+      const {error}=await supabase.from("missions").delete().eq("id",btn.dataset.id);
+      if(error){toast(error.message);return}
+      toast("Mission removed");
+      await loadMissions();
+      await loadRemoveMissions();
+    };
+  });
+}
+
+async function approve(id){let {data:sub,error:e1}=await supabase.from("mission_submissions").select("*").eq("id",id).single();if(e1){toast(e1.message);return}let {error:e2}=await supabase.from("missions").upsert({name:sub.name,credits:sub.credits,mission_type:sub.mission_type,poi:sub.poi,dispatch:sub.dispatch,other_info:sub.other_info,status:"approved",raw_text:sub.raw_text||"",normalized_name:normalizeMissionName(sub.name)},{onConflict:"name"});if(e2){toast(e2.message);return}await supabase.from("mission_submissions").update({status:"approved"}).eq("id",id);toast("Mission approved");await 
 function prefillAdminSettings(){
   try{
     const s=JSON.parse(localStorage.getItem("mc_settings")||"{}");

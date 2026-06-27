@@ -1,8 +1,11 @@
-Exact Unit Parser update.
+Admin Rebuild/Remove update.
 
-Changes:
-- Keeps exact MissionChief unit names as separate requirements.
-- Adds FBI Drones or FBI Investigation Wagons as its own fleet item.
-- Adds unlisted mission-specific units automatically to the Fleet page.
+1. Run admin_maintenance_schema.sql in Supabase SQL Editor.
+2. Replace index.html in your GitHub repo.
+3. Commit: Add admin rebuild and mission removal
+4. Push.
 
-Replace index.html, commit, push.
+Notes:
+- Rebuild works for missions that have raw_text saved.
+- Older missions without raw_text will be skipped until re-imported or edited later.
+- Duplicate protection checks approved and pending missions.
