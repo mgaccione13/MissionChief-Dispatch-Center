@@ -1,1 +1,8 @@
-Update: bulk submit text improved, Admin page has Approve All button, pending missions show preview. Upload extracted folder to same Netlify site.
+Exact Unit Parser update.
+
+Changes:
+- Keeps exact MissionChief unit names as separate requirements.
+- Adds FBI Drones or FBI Investigation Wagons as its own fleet item.
+- Adds unlisted mission-specific units automatically to the Fleet page.
+
+Replace index.html, commit, push.
